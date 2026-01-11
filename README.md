@@ -1,97 +1,107 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+Smart Expense Tracker
+A React Native application that automatically tracks your expenses by parsing transactional SMS messages. It features a secure, local-first architecture using SQLite for data persistence.
 
-# Getting Started
+📱 Features
+Automated Tracking: Reads bank SMS (Android only) to automatically log debits and credits.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Smart Parsing: Extracts amount, bank name, date, and merchant/description using Regex.
 
-## Step 1: Start Metro
+Visual Dashboard: View spending breakdown via Pie Charts and monthly summaries.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+Secure & Private:
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Local Storage: All data is stored locally on the device using SQLite.
 
-```sh
-# Using npm
-npm start
+Manual Entry: option to add cash transactions manually.
 
-# OR using Yarn
-yarn start
-```
+🛠 Tech Stack
+Framework: React Native (CLI)
 
-## Step 2: Build and run your app
+Language: TypeScript
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+State Management: Redux Toolkit
 
-### Android
+Database: SQLite (react-native-sqlite-storage)
 
-```sh
-# Using npm
-npm run android
+UI Library: React Native Paper
 
-# OR using Yarn
-yarn android
-```
+Animations: React Native Reanimated
 
-### iOS
+SMS Access: react-native-get-sms-android
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+🚀 Setup Instructions
+Prerequisites
+Node.js (v18+)
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+Java Development Kit (JDK 17)
 
-```sh
-bundle install
-```
+Android Studio (for Android Simulator/SDK)
 
-Then, and every time you update your native dependencies, run:
+Xcode (for iOS Simulator - Note: SMS features are Android only)
 
-```sh
-bundle exec pod install
-```
+1. Clone & Install
+Bash
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+git clone https://github.com/khansnz518/SmartExpenseTracker.git
+cd SmartExpenseTracker
 
-```sh
-# Using npm
-npm run ios
+# Install Javascript Dependencies
+npm install
 
-# OR using Yarn
-yarn ios
-```
+# Install iOS Pods (Mac Only)
+cd ios && pod install && cd ..
+2. Configure Native Permissions
+Android (android/app/src/main/AndroidManifest.xml): Ensure these permissions are inside the <manifest> tag:
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+XML
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+<uses-permission android:name="android.permission.READ_SMS" />
 
-## Step 3: Modify your app
+3. Run the App
+For Android:
 
-Now that you have successfully run the app, let's make changes!
+Bash
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+npx react-native run-android
+For iOS:
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+Bash
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+npx react-native run-ios
+🔍 SMS Parsing Logic
+The app uses a specific set of rules to ensure only financial transactions are logged, ignoring OTPs and personal messages.
 
-## Congratulations! :tada:
+1. Sender Identification (Filtering)
+We only process messages from known banking headers.
 
-You've successfully run and modified your React Native App. :partying_face:
+Logic: The sender ID must contain specific keywords.
 
-### Now what?
+Keywords: HDFCBK, SBIINB, ICICIB, AXISBK, KOTAKB, INDUSB, BOITXT, PNBSMS, CANARA, UNIONB, YESBNK, BOIIND.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+2. Transaction Type Detection
+We check the message body for keywords to classify the transaction.
 
-# Troubleshooting
+Debit Keywords: debited, spent, purchase, sent, paid.
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+Credit Keywords: credited, received, deposited, added.
 
-# Learn More
+If neither are found, the message is ignored.
 
-To learn more about React Native, take a look at the following resources:
+3. Regex Extraction
+We use Regular Expressions to extract specific data points:
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+A. Extracting Amount Captures formats like "Rs. 500", "INR 1,200.50", "Rs 500".
+
+TypeScript
+
+const AMOUNT_REGEX = /(?:Rs\.?|INR)\s*([\d,]+(?:\.\d{1,2})?)/i;
+B. Extracting Account Number Captures the last 3-4 digits of the account (e.g., "A/c X1234").
+
+TypeScript
+
+const ACCOUNT_REGEX = /[Aa]\/c\s*[X]*(\d{3,4})/;
+C. Extracting Merchant / Description Attempts to find who the money was sent to by looking for text following "at", "to", or "info".
+
+TypeScript
+
+const MERCHANT_REGEX = /(?:at|to|info)\s+([A-Za-z0-9\s\*\.\-]+?)(?=\s+(?:on|from|thru|using|Ref|Avl)|$)/i;
