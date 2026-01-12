@@ -89,14 +89,7 @@ const TransactionHistoryScreen: React.FC<Props> = ({ navigation }) => {
       return matchesSearch;
     });
   }, [transactions, searchQuery, selectedMonth, selectedCategory, selectedBank]);
-
-  // Handlers
-  // const handleDelete = (id: string) => {
-  //   Alert.alert("Delete", "Are you sure?", [
-  //       { text: "Cancel" },
-  //       { text: "Delete", style: 'destructive', onPress: () => dispatch(deleteTransaction(id)) }
-  //   ]);
-  // };
+  
   const handleDelete = (id: string) => {
     Alert.alert("Delete", "Are you sure?", [
         { text: "Cancel" },

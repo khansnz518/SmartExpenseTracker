@@ -14,7 +14,6 @@ export const BANK_HEADERS = [
 
 const AMOUNT_REGEX = /(?:Rs\.?|INR)\s*([\d,]+(?:\.\d{1,2})?)/i;
 const ACCOUNT_REGEX = /[Aa]\/c\s*[X]*(\d{3,4})/;
-const MERCHANT_REGEX = /(?:at|to|info)\s+([A-Za-z0-9\s\*\.\-]+?)(?=\s+(?:on|from|thru|using|Ref|Avl)|$)/i;
 
 export const parseSmsBody = (body: string, address: string, timestamp: number): ParsedSms | null => {
   // A. Check for keywords
@@ -34,22 +33,31 @@ export const parseSmsBody = (body: string, address: string, timestamp: number): 
   const accountMatch = body.match(ACCOUNT_REGEX);
   const account = accountMatch ? accountMatch[1] : null;
 
-  // D. Extract Description
-  let description = 'Unknown Transaction';
-  if (isDebit) {
-    const merchantMatch = body.match(MERCHANT_REGEX);
-    description = merchantMatch ? merchantMatch[1].trim() : 'Debit Transaction';
-  } else {
-    description = 'Bank Credit';
-  }
-
-  // E. Determine Bank Name
+  // D. Determine Bank Name (Moved up so we can use it for description)
   let bankName = 'Unknown Bank';
-  BANK_HEADERS.forEach(header => {
+  
+  // Helper to map headers to cleaner names
+  // You can expand this map for better looking names
+  const headerMap: { [key: string]: string } = {
+    'HDFCBK': 'HDFC Bank',
+    'SBIINB': 'SBI',
+    'ICICIB': 'ICICI Bank',
+    'AXISBK': 'Axis Bank',
+    'KOTAKB': 'Kotak Bank',
+    'INDUSB': 'IndusInd Bank',
+    'CANARA': 'Canara Bank',
+    'UNIONB': 'Union Bank',
+    'YESBNK': 'Yes Bank'
+  };
+
+  // Loop through headers to find a match
+  for (const header of BANK_HEADERS) {
     if (address.toUpperCase().includes(header)) {
-      bankName = header.replace('BK', '').replace('BNK', '').replace('SMS', '');
+        // Use the map if available, otherwise just clean the string
+        bankName = headerMap[header] || header.replace('BK', '').replace('BNK', '').replace('SMS', '');
+        break; // Stop after finding the first match
     }
-  });
+  }
 
   return {
     amount,
@@ -57,6 +65,6 @@ export const parseSmsBody = (body: string, address: string, timestamp: number): 
     account,
     date: new Date(timestamp).toISOString().split('T')[0],
     bank: bankName,
-    description: description.substring(0, 30),
+    description: bankName,
   };
 };

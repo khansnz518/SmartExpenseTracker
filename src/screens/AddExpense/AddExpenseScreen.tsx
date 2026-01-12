@@ -66,32 +66,6 @@ const AddExpenseScreen: React.FC<Props> = ({ navigation, route }) => {
     
     navigation.goBack();
   };
-  // const handleSubmitExpense = (values: any) => {
-  //   const formattedDate = selectedDate.toISOString().split('T')[0];
-
-  //   if (isEditMode && transactionToEdit) {
-  //     // EDIT MODE: Dispatch Edit Action
-  //     dispatch(editTransaction({
-  //       id: transactionToEdit.id,
-  //       type: transactionToEdit.type, // Keep original type
-  //       bankName: transactionToEdit.bankName, // Keep original bank
-  //       amount: Number(values.amount),
-  //       category: values.category,
-  //       date: formattedDate,
-  //       notes: values.notes || '',
-  //     }));
-  //   } else {
-  //     // ADD MODE: Dispatch Add Action
-  //     dispatch(addTransaction({
-  //       amount: Number(values.amount),
-  //       category: values.category,
-  //       date: formattedDate,
-  //       notes: values.notes || '',
-  //     }));
-  //   }
-    
-  //   navigation.goBack();
-  // };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>

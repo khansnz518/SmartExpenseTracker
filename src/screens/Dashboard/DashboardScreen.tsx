@@ -227,7 +227,6 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             )}
         </View>
 
-        {/* 3. ADD EXTRA PADDING AT BOTTOM OF SCROLLVIEW SO FAB DOESN'T COVER CONTENT */}
         <View style={{ height: 100 }} /> 
       </ScrollView>
 

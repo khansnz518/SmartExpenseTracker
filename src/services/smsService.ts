@@ -71,7 +71,7 @@ export const syncSmsToTransactions = async () => {
           // Using store.dispatch directly because we are outside a React component
           store.dispatch(addTransaction({
             amount: parsed.amount,
-            category: parsed.type === 'CREDIT' ? 'Income' : 'General', 
+            category: parsed.type === 'CREDIT' ? 'Income' : 'Bank Related', 
             date: parsed.date,
             notes: parsed.description,
             bankName: parsed.bank,
